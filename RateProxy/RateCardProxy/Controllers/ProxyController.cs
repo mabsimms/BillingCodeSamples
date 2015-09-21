@@ -27,6 +27,8 @@ namespace ISVDemoUsage.Controllers
 
         private static readonly string ResourceString =
             @"https://management.azure.com/subscriptions/{0}/providers/Microsoft.Commerce/UsageAggregates?api-version={1}&reportedStartTime={2}&reportedEndTime={3}&aggregationGranularity={4}&showDetails={5}&continuationToken={6}";
+        private readonly object ApiVersion;
+
         // 0 - subscription ID
         // 1 - API version
         // 2 - reported start time (ISO9601 with escape codes)
@@ -74,7 +76,7 @@ namespace ISVDemoUsage.Controllers
                    _resourceId, credential, userId);
 
                 // Making a call to the Azure Usage API for a set time frame with the input AzureSubID
-               
+
                 /*
                    // 0 - subscription ID
                 // 1 - API version
@@ -83,8 +85,18 @@ namespace ISVDemoUsage.Controllers
                 // 4 - aggregation granularity
                 // 5 - showdetail-boolean-Value
                 // 6 - continuation token (empty on first call)*/
+                var startTime = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                var endTime = DateTime.Now.AddMonths(-1).ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+                var aggregationGranularity = "Hourly";
 
-                string requesturl = String.Format("", "");
+                string requesturl = String.Format(ResourceString, 
+                    ApiVersion,
+                    startTime,
+                    endTime,
+                    aggregationGranularity,
+                    true,
+                    ""
+                );
 
                 //Crafting the HTTP call
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requesturl);
@@ -98,8 +110,8 @@ namespace ISVDemoUsage.Controllers
                 StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
                 UsageResponse = readStream.ReadToEnd();
 
-                                return new HttpResponseMessage(HttpStatusCode.OK);
-                }
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
             catch (Exception ex0)
             {
                 throw;
